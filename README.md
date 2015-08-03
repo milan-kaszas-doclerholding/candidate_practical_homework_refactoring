@@ -13,4 +13,4 @@ The goals are:
 * The console output of can be changed
 * Only PHPUnit can be used for testing
 * Commenting is not necessary
-* Please DO NOT fork this repo!
+* You can clone this repo, but the homework should be sent to us through email (with the git files)
