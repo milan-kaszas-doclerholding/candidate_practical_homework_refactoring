@@ -2,52 +2,129 @@
 
 namespace Language;
 
+use Language\Output\OutputFactory;
+use Language\Output\OutputInterface;
+use Language\Config\Reader as ConfigReader;
+
 /**
  * Business logic related to generating language files.
+ * Class LanguageBatchBo
+ * @package Language
  */
 class LanguageBatchBo
 {
+
 	/**
-	 * Contains the applications which ones require translations.
-	 *
+	 * @var ConfigReader
+	 */
+	protected $configReader;
+
+	/**
+	 * @var OutputInterface
+	 */
+	protected $output;
+
+	/**
+	 * Contains the applications which require translations.
 	 * @var array
 	 */
-	protected static $applications = array();
+	protected $applications = [];
+
+	/**
+	 * @param string $outputType
+	 * @throws \Exception
+	 */
+	public function __construct($outputType = OutputFactory::TYPE_CONSOLE)
+	{
+		//init deps
+		$this->configReader = new ConfigReader();
+		$this->output = OutputFactory::create($outputType);
+		//fetch apps to translate with config
+		$this->applications = $this->configReader->getSystemTranslatedApps();
+	}
+
+	/**
+	 * @param $message
+	 * @param string $severity
+	 * @return $this
+	 */
+	protected function addOutputMessage($message, $severity = OutputInterface::SEVERITY_INFO)
+	{
+		$this->output->addMessage($message, $severity);
+		return $this;
+	}
+
+	/**
+	 * @return $this
+	 */
+	protected function printOutputMessages()
+	{
+		$this->output
+			->flushMessages()
+			->resetMessages();
+		return $this;
+	}
+
+	/**
+	 * Fetch all (or specific) applications
+	 * @param array $appNames : if specific apps wanted, apps list
+	 * @return array
+	 * @throws \Exception
+	 */
+	protected function getApplications($appNames = [])
+	{
+		//check if specific apps wanted
+		if(!empty($appNames) && is_array($appNames)){
+			$appsToReturn = [];
+			foreach($appNames as $appName){
+				if(!isset($this->applications[$appName])){
+					throw new \Exception('Unknown application with name "' . $appName . '"');
+				}else{
+					$appsToReturn[$appName] = $this->applications[$appName];
+				}
+			}
+			//return specific fetches
+			return $appsToReturn;
+		}
+		//return global fetches
+		return $this->applications;
+	}
 
 	/**
 	 * Starts the language file generation.
-	 *
-	 * @return void
+	 * @throws \Exception
 	 */
-	public static function generateLanguageFiles()
+	public function generateLanguageFiles()
 	{
-		// The applications where we need to translate.
-		self::$applications = Config::get('system.translated_applications');
-
-		echo "\nGenerating language files\n";
-		foreach (self::$applications as $application => $languages) {
-			echo "[APPLICATION: " . $application . "]\n";
-			foreach ($languages as $language) {
-				echo "\t[LANGUAGE: " . $language . "]";
-				if (self::getLanguageFile($application, $language)) {
-					echo " OK\n";
-				}
-				else {
-					throw new \Exception('Unable to generate language file!');
+		try{
+			//notify start
+			$this->addOutputMessage("Generating language files");
+			//iterates on apps
+			foreach ($this->getApplications() as $application => $languages) {
+				$this->addOutputMessage("[APPLICATION: " . $application . "]");
+				//iterates on languages
+				foreach ($languages as $language) {
+					$this->addOutputMessage("\t[LANGUAGE: " . $language . "]");
+					if (self::getLanguageFile($application, $language)) {
+						$this->addOutputMessage("OK", OutputInterface::SEVERITY_SUCCESS);
+					} else {
+						throw new \Exception('Unable to generate language file!');
+					}
 				}
 			}
+		}catch(\Exception $e){
+			//add error output
+			$this->addOutputMessage($e->getMessage(), OutputInterface::SEVERITY_ERROR);
 		}
+		return $this->printOutputMessages();
 	}
 
 	/**
 	 * Gets the language file for the given language and stores it.
-	 *
-	 * @param string $application   The name of the application.
-	 * @param string $language      The identifier of the language.
-	 *
-	 * @throws CurlException   If there was an error during the download of the language file.
-	 *
-	 * @return bool   The success of the operation.
+	 * @param $application: 	The name of the application.
+	 * @param $language:		The identifier of the language.
+	 * @return bool:			The success of the operation.
+	 * @throws \Exception:		If there was an error during the download of the language file.
 	 */
 	protected static function getLanguageFile($application, $language)
 	{
@@ -72,7 +149,6 @@ class LanguageBatchBo
 		// If we got correct data we store it.
 		$destination = self::getLanguageCachePath($application) . $language . '.php';
 		// If there is no folder yet, we'll create it.
-		var_dump($destination);
 		if (!is_dir(dirname($destination))) {
 			mkdir(dirname($destination), 0755, true);
 		}
