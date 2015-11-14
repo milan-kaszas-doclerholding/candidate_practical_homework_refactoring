@@ -4,8 +4,6 @@ namespace Language;
 
 use Batch\AbstractBatch;
 use Batch\Output\OutputFactory;
-use Batch\Output\OutputInterface;
-use Batch\Config\Reader as ConfigReader;
 
 /**
  * Business logic related to generating language files.
@@ -14,6 +12,12 @@ use Batch\Config\Reader as ConfigReader;
  */
 class LanguageBatchBo extends AbstractBatch
 {
+
+	/**
+	 * Batch identity
+	 */
+	protected static $batchName 	= __CLASS__;
+	protected static $batchVersion 	= '1.0.0';
 
 	/**
 	 * Contains the applications which require translations.
@@ -66,15 +70,15 @@ class LanguageBatchBo extends AbstractBatch
 	{
 		try{
 			//notify start
-			$this->addOutputMessage("Generating language files");
+			$this->addInfoMessage("Generating language files".$this->getBatchName());
 			//iterates on apps
 			foreach ($this->getApplications() as $application => $languages) {
-				$this->addOutputMessage("[APPLICATION: " . $application . "]");
+				$this->addInfoMessage("[APPLICATION: " . $application . "]");
 				//iterates on languages
 				foreach ($languages as $language) {
-					$this->addOutputMessage("\t[LANGUAGE: " . $language . "]");
+					$this->addInfoMessage("\t[LANGUAGE: " . $language . "]");
 					if (self::getLanguageFile($application, $language)) {
-						$this->addOutputMessage("OK", OutputInterface::SEVERITY_SUCCESS);
+						$this->addSuccessMessage("OK");
 					} else {
 						throw new \Exception('Unable to generate language file!');
 					}
@@ -82,7 +86,7 @@ class LanguageBatchBo extends AbstractBatch
 			}
 		}catch(\Exception $e){
 			//add error output
-			$this->addOutputMessage($e->getMessage(), OutputInterface::SEVERITY_ERROR);
+			$this->addErrorMessage($e->getMessage());
 		}
 		return $this->printOutputMessages();
 	}

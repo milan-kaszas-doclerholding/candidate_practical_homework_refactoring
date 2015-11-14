@@ -84,7 +84,7 @@ class Console implements OutputInterface
      */
     protected function colorizeMessage($message, $color)
     {
-        //encapsulates in CLI font color
+        //encapsulates CLI font color
         return "\033[" . $color . "m" . $message . "\033[0m";
     }
 }

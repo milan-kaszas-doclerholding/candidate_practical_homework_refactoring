@@ -7,10 +7,10 @@ use Batch\Output\OutputInterface;
 use Batch\Config\Reader as ConfigReader;
 
 /**
- * Class AbstractBatch : abstract batch class
+ * Class AbstractBatch : batch class abstraction
  * @package Batch
  */
-abstract class AbstractBatch
+abstract class AbstractBatch implements BatchInterface
 {
 
 	/**
@@ -22,6 +22,27 @@ abstract class AbstractBatch
 	 * @var OutputInterface
 	 */
 	protected $output;
+
+
+	/**
+	 * Gets batch name
+	 * Uses late static binding
+	 * @return mixed
+	 */
+	public static function getBatchName()
+	{
+		return static::$batchName;
+	}
+
+	/**
+	 * Gets batch version
+	 * Uses late static binding
+	 * @return mixed
+	 */
+	public static function getBatchVersion()
+	{
+		return static::$batchVersion;
+	}
 
 	/**
 	 * @param string $outputType
@@ -36,10 +57,37 @@ abstract class AbstractBatch
 
 	/**
 	 * @param $message
+	 * @return AbstractBatch
+	 */
+	protected function addInfoMessage($message)
+	{
+		return $this->addOutputMessage($message);
+	}
+
+	/**
+	 * @param $message
+	 * @return AbstractBatch
+	 */
+	protected function addSuccessMessage($message)
+	{
+		return $this->addOutputMessage($message, OutputInterface::SEVERITY_SUCCESS);
+	}
+
+	/**
+	 * @param $message
+	 * @return AbstractBatch
+	 */
+	protected function addErrorMessage($message)
+	{
+		return $this->addOutputMessage($message, OutputInterface::SEVERITY_ERROR);
+	}
+
+	/**
+	 * @param $message
 	 * @param string $severity
 	 * @return $this
 	 */
-	protected function addOutputMessage($message, $severity = OutputInterface::SEVERITY_INFO)
+	private function addOutputMessage($message, $severity = OutputInterface::SEVERITY_INFO)
 	{
 		$this
 			->output

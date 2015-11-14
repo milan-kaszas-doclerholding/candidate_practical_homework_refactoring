@@ -36,6 +36,10 @@ class OutputFactory
             default:
                 throw new \Exception('Unhandled output type "' . $outputType . '"');
         }
+        //check if output implements OutputInterface
+        if(!$output instanceof OutputInterface){
+            throw new \Exception('Output object must implements Batch\Output\OutputInterface');
+        }
         //return
         return $output;
     }
