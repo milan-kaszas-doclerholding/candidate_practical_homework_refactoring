@@ -2,27 +2,18 @@
 
 namespace Language;
 
-use Language\Output\OutputFactory;
-use Language\Output\OutputInterface;
-use Language\Config\Reader as ConfigReader;
+use Batch\AbstractBatch;
+use Batch\Output\OutputFactory;
+use Batch\Output\OutputInterface;
+use Batch\Config\Reader as ConfigReader;
 
 /**
  * Business logic related to generating language files.
  * Class LanguageBatchBo
  * @package Language
  */
-class LanguageBatchBo
+class LanguageBatchBo extends AbstractBatch
 {
-
-	/**
-	 * @var ConfigReader
-	 */
-	protected $configReader;
-
-	/**
-	 * @var OutputInterface
-	 */
-	protected $output;
 
 	/**
 	 * Contains the applications which require translations.
@@ -36,33 +27,10 @@ class LanguageBatchBo
 	 */
 	public function __construct($outputType = OutputFactory::TYPE_CONSOLE)
 	{
-		//init deps
-		$this->configReader = new ConfigReader();
-		$this->output = OutputFactory::create($outputType);
+		//parent call
+		parent::__construct($outputType);
 		//fetch apps to translate with config
 		$this->applications = $this->configReader->getSystemTranslatedApps();
-	}
-
-	/**
-	 * @param $message
-	 * @param string $severity
-	 * @return $this
-	 */
-	protected function addOutputMessage($message, $severity = OutputInterface::SEVERITY_INFO)
-	{
-		$this->output->addMessage($message, $severity);
-		return $this;
-	}
-
-	/**
-	 * @return $this
-	 */
-	protected function printOutputMessages()
-	{
-		$this->output
-			->flushMessages()
-			->resetMessages();
-		return $this;
 	}
 
 	/**

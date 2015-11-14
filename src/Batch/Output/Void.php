@@ -1,9 +1,9 @@
 <?php
 
-namespace Language\Output;
+namespace Batch\Output;
 
 /**
- * Class Void : do nothing :)
+ * Class Void : silent output
  * @package Language\Output
  */
 class Void implements OutputInterface

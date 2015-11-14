@@ -5,6 +5,9 @@
         "phpunit/phpunit": "4.7.*"
     },
     "autoload": {
-        "psr-4": {"Language\\": "src/"}
+        "psr-4": {
+            "Language\\": "src/Language",
+            "Batch\\": "src/Batch"
+        }
     }
 }

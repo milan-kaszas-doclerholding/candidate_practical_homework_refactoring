@@ -1,6 +1,6 @@
 <?php
 
-namespace Language\Output;
+namespace Batch\Output;
 
 /**
  * Class Console : php CLI output
@@ -9,7 +9,7 @@ namespace Language\Output;
 class Console implements OutputInterface
 {
     /**
-     * CLI colors
+     * CLI colors constants
      */
     const CLI_COLOR_RED = '0;31';
     const CLI_COLOR_GREEN = '1;32';
@@ -25,7 +25,10 @@ class Console implements OutputInterface
      */
     public function addMessage($message, $severity = self::SEVERITY_INFO)
     {
-        array_push($this->buffer, $this->getPreparedMessage($message, $severity));
+        array_push(
+            $this->buffer,
+            $this->getPreparedMessage($message, $severity)
+        );
         return $this;
     }
 
@@ -60,15 +63,28 @@ class Console implements OutputInterface
         switch($severity){
             //green for success
             case self::SEVERITY_SUCCESS:
-                $preparedMessage = "\033[" . self::CLI_COLOR_GREEN . "m" . $message . "\033[0m";
+                $preparedMessage = $this->colorizeMessage($message, self::CLI_COLOR_GREEN);
                 break;
             //red for error (obvious)
             case self::SEVERITY_ERROR:
-                $preparedMessage = "\033[" . self::CLI_COLOR_RED . "m" . $message . "\033[0m";
+                $preparedMessage = $this->colorizeMessage($message, self::CLI_COLOR_RED);
                 break;
+            //no color for info and others
             default:
                 $preparedMessage = $message;
         }
+        //return prepared message
         return $preparedMessage;
+    }
+
+    /**
+     * @param $message
+     * @param $color
+     * @return string
+     */
+    protected function colorizeMessage($message, $color)
+    {
+        //encapsulates in CLI font color
+        return "\033[" . $color . "m" . $message . "\033[0m";
     }
 }

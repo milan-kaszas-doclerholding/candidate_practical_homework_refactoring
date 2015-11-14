@@ -1,6 +1,6 @@
 <?php
 
-namespace Language\Output;
+namespace Batch\Output;
 
 /**
  * Interface OutputInterface
@@ -8,6 +8,9 @@ namespace Language\Output;
  */
 interface OutputInterface
 {
+    /**
+     * Output severities
+     */
     const SEVERITY_INFO     = 'info';
     const SEVERITY_SUCCESS  = 'success';
     const SEVERITY_ERROR    = 'error';

@@ -1,6 +1,6 @@
 <?php
 
-namespace Language\Config;
+namespace Batch\Config;
 
 use Language\Config as BaseConfig;
 

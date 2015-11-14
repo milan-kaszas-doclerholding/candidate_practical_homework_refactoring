@@ -1,6 +1,6 @@
 <?php
 
-namespace Language\Output;
+namespace Batch\Output;
 
 /**
  * Class OutputFactory : OutputInterface objects factory
