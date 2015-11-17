@@ -4,7 +4,7 @@ namespace Language;
 
 class ApiCall
 {
-	const GET_LANGUAGE_FILE_RESULT = "<?php
+    const GET_LANGUAGE_FILE_RESULT = "<?php
 		return array (
 			'our models' => 'Unsere Darsteller',
 			'favorites' => 'Favoriten',
@@ -42,7 +42,7 @@ class ApiCall
 			'woman' => 'Frau'
 		);";
 
-	const GET_APPLET_LANGUAGE_FILE_RESULT = '<?xml version="1.0" encoding="UTF-8"?>
+    const GET_APPLET_LANGUAGE_FILE_RESULT = '<?xml version="1.0" encoding="UTF-8"?>
 		<data>
 			<button_go_private value="Privát Műsor indítása"/>
 			<button_send value="Küldés"/>
@@ -69,34 +69,32 @@ class ApiCall
 			<info_personalinfo value="Modell adatlap"/>
 		</data>';
 
-	public static function call($target, $mode, $getParameters, $postParameters)
-	{
-		if (!isset($getParameters['action']))
-		{
-			return;
-		}
+    public static function call($target, $mode, $getParameters, $postParameters)
+    {
+        if (!isset($getParameters['action'])) {
+            return;
+        }
 
-		switch ($getParameters['action'])
-		{
-			case 'getLanguageFile':
-				return self::formatAsResult(self::GET_LANGUAGE_FILE_RESULT);
-				break;
+        switch ($getParameters['action']) {
+            case 'getLanguageFile':
+                return self::formatAsResult(self::GET_LANGUAGE_FILE_RESULT);
+                break;
 
-			case 'getAppletLanguages':
-				return self::formatAsResult(['en']);
-				break;
+            case 'getAppletLanguages':
+                return self::formatAsResult(['en']);
+                break;
 
-			case 'getAppletLanguageFile':
-				return self::formatAsResult(self::GET_APPLET_LANGUAGE_FILE_RESULT);
-				break;
-		}
-	}
+            case 'getAppletLanguageFile':
+                return self::formatAsResult(self::GET_APPLET_LANGUAGE_FILE_RESULT);
+                break;
+        }
+    }
 
-	private static function formatAsResult($data)
-	{
-		return [
-			'status' => 'OK',
-			'data'   => $data,
-		];
-	}
+    private static function formatAsResult($data)
+    {
+        return [
+            'status' => 'OK',
+            'data' => $data,
+        ];
+    }
 }
