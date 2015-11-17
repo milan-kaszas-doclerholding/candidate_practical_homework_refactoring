@@ -2,8 +2,8 @@
 
 namespace Language\Config;
 
-use Language\Config as BaseConfig;
 use Batch\Traits\Singletonable;
+use Language\Config as BaseConfig;
 
 /**
  * Class Reader : Singleton access
@@ -20,8 +20,8 @@ class Reader
      * Knows keys from config
      * @see Language\Config
      */
-    const SYSTEM_PATHS_ROOT         = 'system.paths.root';
-    const SYSTEM_TRANSLATED_APPS    = 'system.translated_applications';
+    const SYSTEM_PATHS_ROOT = 'system.paths.root';
+    const SYSTEM_TRANSLATED_APPS = 'system.translated_applications';
 
     /**
      * @param $key

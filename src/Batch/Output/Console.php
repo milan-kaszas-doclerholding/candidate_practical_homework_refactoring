@@ -34,26 +34,6 @@ class Console implements OutputInterface
     }
 
     /**
-     * @inheritdoc
-     */
-    public function flushMessages()
-    {
-        foreach($this->buffer as $message) {
-            echo $message . PHP_EOL;
-        }
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function resetMessages()
-    {
-        $this->buffer = array();
-        return $this;
-    }
-
-    /**
      * Messages CLI decorator
      * @param $message
      * @param $severity
@@ -61,7 +41,7 @@ class Console implements OutputInterface
      */
     protected function getPreparedMessage($message, $severity)
     {
-        switch($severity){
+        switch ($severity) {
             //green for success
             case self::SEVERITY_SUCCESS:
                 $preparedMessage = $this->colorizeMessage($message, self::CLI_COLOR_GREEN);
@@ -91,5 +71,25 @@ class Console implements OutputInterface
     {
         //encapsulates CLI font color
         return "\033[" . $color . "m" . $message . "\033[0m";
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function flushMessages()
+    {
+        foreach ($this->buffer as $message) {
+            echo $message . PHP_EOL;
+        }
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function resetMessages()
+    {
+        $this->buffer = array();
+        return $this;
     }
 }

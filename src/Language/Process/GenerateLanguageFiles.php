@@ -3,8 +3,8 @@
 namespace Language\Process;
 
 use Batch\Process\AbstractProcess;
-use Language\Config\Reader as ConfigReader;
 use Language\Api\Caller as ApiCaller;
+use Language\Config\Reader as ConfigReader;
 
 /**
  * Business logic related to generating language files.
@@ -40,10 +40,10 @@ class GenerateLanguageFiles extends AbstractProcess
 
     /**
      * Gets the language file for the given language and stores it.
-     * @param $application: 	The name of the application.
-     * @param $language:		The identifier of the language.
-     * @return bool:			The success of the operation.
-     * @throws \Exception:		If there was an error during the download of the language file.
+     * @param $application :    The name of the application.
+     * @param $language :        The identifier of the language.
+     * @return bool:            The success of the operation.
+     * @throws \Exception:        If there was an error during the download of the language file.
      */
     private function buildLanguageFile($application, $language)
     {
@@ -62,7 +62,7 @@ class GenerateLanguageFiles extends AbstractProcess
      */
     private function getLanguageCachePath($application)
     {
-        return ConfigReader::getInstance()->getSystemPathsRoot() . '/../cache/' . $application. '/';
+        return ConfigReader::getInstance()->getSystemPathsRoot() . '/../cache/' . $application . '/';
     }
 
     /**

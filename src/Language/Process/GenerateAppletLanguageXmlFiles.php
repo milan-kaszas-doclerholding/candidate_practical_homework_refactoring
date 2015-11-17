@@ -3,8 +3,8 @@
 namespace Language\Process;
 
 use Batch\Process\AbstractProcess;
-use Language\Config\Reader as ConfigReader;
 use Language\Api\Caller as ApiCaller;
+use Language\Config\Reader as ConfigReader;
 
 /**
  * Business logic related to generating language files.
@@ -29,9 +29,9 @@ class GenerateAppletLanguageXmlFiles extends AbstractProcess
         foreach ($applets as $appletDirectory => $appletLanguageId) {
             $this->addMessage(" Getting > $appletLanguageId ($appletDirectory) language xmls...");
             $languages = ApiCaller::getInstance()->getAppletLanguagesFromApi($appletLanguageId);
-            if(empty($languages)){
+            if (empty($languages)) {
                 throw new \Exception('There is no available languages for the ' . $appletLanguageId . ' applet.');
-            }else{
+            } else {
                 $this->addMessage(' - Available languages: ' . implode(', ', $languages['data']));
             }
             foreach ($languages['data'] as $language) {
@@ -74,10 +74,10 @@ class GenerateAppletLanguageXmlFiles extends AbstractProcess
         $path = $this->getFlashCachePath();
         $result = ApiCaller::getInstance()->getAppletLanguageFilesFromApi($applet, $language);
         $xmlContent = $result['data'];
-        $xmlFile    = $path . '/lang_' . $language . '.xml';
-        if(strlen($xmlContent) == file_put_contents($xmlFile, $xmlContent)){
+        $xmlFile = $path . '/lang_' . $language . '.xml';
+        if (strlen($xmlContent) == file_put_contents($xmlFile, $xmlContent)) {
             $this->addSuccessMessage(' OK saving $xmlFile was successful.');
-        }else{
+        } else {
             throw new \Exception(
                 'Unable to save applet: (' .
                 $applet .

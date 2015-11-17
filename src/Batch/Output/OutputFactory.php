@@ -12,7 +12,7 @@ class OutputFactory
      * Output types
      */
     const TYPE_CONSOLE = 'console';
-    const TYPE_VOID    = 'void';
+    const TYPE_VOID = 'void';
 
     /**
      * @param $outputType
@@ -23,7 +23,7 @@ class OutputFactory
     {
         $output = null;
         //type analysis
-        switch($outputType){
+        switch ($outputType) {
             //console
             case self::TYPE_CONSOLE:
                 $output = new Console();
@@ -37,7 +37,7 @@ class OutputFactory
                 throw new \Exception('Unhandled output type "' . $outputType . '"');
         }
         //check if output implements OutputInterface
-        if(!$output instanceof OutputInterface){
+        if (!$output instanceof OutputInterface) {
             throw new \Exception('Output object must implements Batch\Output\OutputInterface');
         }
         //return

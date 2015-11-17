@@ -2,8 +2,8 @@
 
 namespace Language\Api;
 
-use Language\ApiCall;
 use Batch\Traits\Singletonable;
+use Language\ApiCall;
 
 /**
  * Class Reader : Singleton access
@@ -25,10 +25,10 @@ class Caller
     /**
      * System & actions
      */
-    const SYSTEM_LANGUAGE_FILE          = 'LanguageFiles';
-    const ACTION_LANGUAGE_FILE          = 'getLanguageFile';
-    const ACTION_APPLET_LANGUAGE        = 'getAppletLanguages';
-    const ACTION_APPLET_LANGUAGE_FILE   = 'getAppletLanguageFile';
+    const SYSTEM_LANGUAGE_FILE = 'LanguageFiles';
+    const ACTION_LANGUAGE_FILE = 'getLanguageFile';
+    const ACTION_APPLET_LANGUAGE = 'getAppletLanguages';
+    const ACTION_APPLET_LANGUAGE_FILE = 'getAppletLanguageFile';
 
     /**
      * @param $language

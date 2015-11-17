@@ -11,10 +11,10 @@ interface OutputInterface
     /**
      * Output severities
      */
-    const SEVERITY_LOG      = 'log';
-    const SEVERITY_INFO     = 'info';
-    const SEVERITY_SUCCESS  = 'success';
-    const SEVERITY_ERROR    = 'error';
+    const SEVERITY_LOG = 'log';
+    const SEVERITY_INFO = 'info';
+    const SEVERITY_SUCCESS = 'success';
+    const SEVERITY_ERROR = 'error';
 
     /**
      * @param $message
