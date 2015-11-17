@@ -31,7 +31,7 @@ class GenerateLanguageFiles extends AbstractProcess
                 if ($this->buildLanguageFile($application, $language)) {
                     $this->addSuccessMessage("-> OK");
                 } else {
-                    throw new \Exception('Unable to generate language file!');
+                    self::throwRuntimeError('Unable to generate language file !');
                 }
             }
         }

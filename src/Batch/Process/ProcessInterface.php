@@ -37,4 +37,12 @@ interface ProcessInterface
      * @return ProcessInterface
      */
     function stop($processName = null);
+
+    /**
+     * @param $message
+     * @param null $data
+     * @throws ProcessException
+     * @return void
+     */
+    static function throwRuntimeError($message, $data = null);
 }

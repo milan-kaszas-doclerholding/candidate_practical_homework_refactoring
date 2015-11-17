@@ -37,15 +37,25 @@ class Caller
      */
     public function getLanguageFileFromApi($language)
     {
-        return $this->makeApiCall(
-            self::SYSTEM_API,
-            self::LANGUAGE_API,
-            array(
-                'system' => self::SYSTEM_LANGUAGE_FILE,
-                'action' => self::ACTION_LANGUAGE_FILE
-            ),
-            array('language' => $language)
-        );
+        $result = null;
+        try{
+            $result = $this->makeApiCall(
+                self::SYSTEM_API,
+                self::LANGUAGE_API,
+                array(
+                    'system' => self::SYSTEM_LANGUAGE_FILE,
+                    'action' => self::ACTION_LANGUAGE_FILE
+                ),
+                array('language' => $language)
+            );
+        } catch (ApiException $e){
+            throw new \Exception(
+                'Error during getting language file: (' .
+                $language .
+                ')'
+            );
+        }
+        return $result;
     }
 
     /**
@@ -55,17 +65,29 @@ class Caller
      */
     public function getAppletLanguagesFromApi($applet)
     {
-        return $this->makeApiCall(
-            self::SYSTEM_API,
-            self::LANGUAGE_API,
-            array(
-                'system' => self::SYSTEM_LANGUAGE_FILE,
-                'action' => self::ACTION_APPLET_LANGUAGE
-            ),
-            array(
-                'applet' => $applet,
-            )
-        );
+        $result = null;
+        try{
+            $result = $this->makeApiCall(
+                self::SYSTEM_API,
+                self::LANGUAGE_API,
+                array(
+                    'system' => self::SYSTEM_LANGUAGE_FILE,
+                    'action' => self::ACTION_APPLET_LANGUAGE
+                ),
+                array(
+                    'applet' => $applet,
+                )
+            );
+        } catch (ApiException $e){
+            //error
+            throw new \Exception(
+                'Getting languages for applet (' .
+                $applet .
+                ') was unsuccessful ' .
+                $e->getMessage()
+            );
+        }
+        return $result;
     }
 
     /**
@@ -76,18 +98,31 @@ class Caller
      */
     public function getAppletLanguageFilesFromApi($applet, $language)
     {
-        return $this->makeApiCall(
-            self::SYSTEM_API,
-            self::LANGUAGE_API,
-            array(
-                'system' => self::SYSTEM_LANGUAGE_FILE,
-                'action' => self::ACTION_APPLET_LANGUAGE_FILE
-            ),
-            array(
-                'applet' => $applet,
-                'language' => $language
-            )
-        );
+        $result = null;
+        try{
+            $result = $this->makeApiCall(
+                self::SYSTEM_API,
+                self::LANGUAGE_API,
+                array(
+                    'system' => self::SYSTEM_LANGUAGE_FILE,
+                    'action' => self::ACTION_APPLET_LANGUAGE_FILE
+                ),
+                array(
+                    'applet' => $applet,
+                    'language' => $language
+                )
+            );
+        } catch (ApiException $e){
+            throw new \Exception(
+                'Getting language xml for applet: (' .
+                $applet .
+                ') on language: (' .
+                $language .
+                ') was unsuccessful: '
+                . $e->getMessage()
+            );
+        }
+        return $result;
     }
 
     /**
@@ -111,18 +146,19 @@ class Caller
         // Keep specific API result analysis ...
         // Error during the api call.
         if ($result === false || !isset($result['status'])) {
-            throw new \Exception('Error during the api call');
+            throw ApiException::apiCallError();
         }
         // Wrong response.
         if ($result['status'] != 'OK') {
-            throw new \Exception('Wrong response: '
-                . (!empty($result['error_type']) ? 'Type(' . $result['error_type'] . ') ' : '')
+            throw ApiException::invalidResponseStatus(
+                (!empty($result['error_type']) ? 'Type(' . $result['error_type'] . ') ' : '')
                 . (!empty($result['error_code']) ? 'Code(' . $result['error_code'] . ') ' : '')
-                . ((string)$result['data']));
+                . print_r($result['data'],true)
+            );
         }
         // Wrong content.
         if ($result['data'] === false) {
-            throw new \Exception('Wrong content!');
+            throw ApiException::invalidResponseContent();
         }
 
         // return result

@@ -3,10 +3,10 @@
 namespace Batch\Output;
 
 /**
- * Class Console : php CLI output
- * @package Language\Output
+ * Class Console : php CLI colorized output
+ * @package Batch\Output
  */
-class Console implements OutputInterface
+class Console extends Cli
 {
     /**
      * CLI colors constants
@@ -14,24 +14,6 @@ class Console implements OutputInterface
     const CLI_COLOR_RED = '0;31';
     const CLI_COLOR_GREEN = '1;32';
     const CLI_COLOR_CYAN = '1;36';
-
-    /**
-     * Messages buffer
-     * @var array
-     */
-    protected $buffer = array();
-
-    /**
-     * @inheritdoc
-     */
-    public function addMessage($message, $severity = self::SEVERITY_LOG)
-    {
-        array_push(
-            $this->buffer,
-            $this->getPreparedMessage($message, $severity)
-        );
-        return $this;
-    }
 
     /**
      * Messages CLI decorator
@@ -71,25 +53,5 @@ class Console implements OutputInterface
     {
         //encapsulates CLI font color
         return "\033[" . $color . "m" . $message . "\033[0m";
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function flushMessages()
-    {
-        foreach ($this->buffer as $message) {
-            echo $message . PHP_EOL;
-        }
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function resetMessages()
-    {
-        $this->buffer = array();
-        return $this;
     }
 }

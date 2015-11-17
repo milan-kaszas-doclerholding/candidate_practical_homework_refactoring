@@ -27,16 +27,19 @@ class GenerateAppletLanguageXmlFiles extends AbstractProcess
         $applets = $this->getAppletsList();
         //iterates
         foreach ($applets as $appletDirectory => $appletLanguageId) {
+            //fetch languages
             $this->addMessage(" Getting > $appletLanguageId ($appletDirectory) language xmls...");
             $languages = ApiCaller::getInstance()->getAppletLanguagesFromApi($appletLanguageId);
             if (empty($languages)) {
-                throw new \Exception('There is no available languages for the ' . $appletLanguageId . ' applet.');
+                self::throwRuntimeError('There is no available languages for the ' . $appletLanguageId . ' applet.');
             } else {
                 $this->addMessage(' - Available languages: ' . implode(', ', $languages['data']));
             }
+            //generate language files
             foreach ($languages['data'] as $language) {
                 $this->buildXmlFile($appletLanguageId, $language);
             }
+            //notify
             $this->addMessage(' < ' . $appletLanguageId . '(' . $appletDirectory . ') language xml cached.');
         }
         //notify & return
@@ -76,9 +79,9 @@ class GenerateAppletLanguageXmlFiles extends AbstractProcess
         $xmlContent = $result['data'];
         $xmlFile = $path . '/lang_' . $language . '.xml';
         if (strlen($xmlContent) == file_put_contents($xmlFile, $xmlContent)) {
-            $this->addSuccessMessage(' OK saving $xmlFile was successful.');
+            $this->addSuccessMessage(' OK saving ' . $xmlFile . ' was successful.');
         } else {
-            throw new \Exception(
+            self::throwRuntimeError(
                 'Unable to save applet: (' .
                 $applet .
                 ') language: (' .

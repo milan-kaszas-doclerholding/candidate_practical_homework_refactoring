@@ -3,9 +3,10 @@
 namespace Batch\Process;
 
 use Batch\BatchInterface;
+use Batch\Process\ProcessException;
 
 /**
- * Class AbstractBatch : batch class abstraction
+ * Class AbstractProcess : batch class abstraction
  * @package Batch
  */
 abstract class AbstractProcess implements ProcessInterface
@@ -33,6 +34,14 @@ abstract class AbstractProcess implements ProcessInterface
     }
 
     /**
+     * @return BatchInterface
+     */
+    public function getBatch()
+    {
+        return $this->batch;
+    }
+
+    /**
      * @param null $processName
      * @return ProcessInterface
      */
@@ -54,24 +63,6 @@ abstract class AbstractProcess implements ProcessInterface
         );
         //return self
         return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function addInfoMessage($message)
-    {
-        return $this
-            ->getBatch()
-            ->addInfoMessage($message);
-    }
-
-    /**
-     * @return BatchInterface
-     */
-    public function getBatch()
-    {
-        return $this->batch;
     }
 
     /**
@@ -103,6 +94,16 @@ abstract class AbstractProcess implements ProcessInterface
     /**
      * @inheritdoc
      */
+    public function addInfoMessage($message)
+    {
+        return $this
+            ->getBatch()
+            ->addInfoMessage($message);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function addSuccessMessage($message)
     {
         return $this
@@ -118,5 +119,13 @@ abstract class AbstractProcess implements ProcessInterface
         return $this
             ->getBatch()
             ->addErrorMessage($message);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function throwRuntimeError($message, $data = null)
+    {
+        throw ProcessException::runtimeError($message, $data);
     }
 }

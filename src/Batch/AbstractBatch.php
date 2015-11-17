@@ -5,6 +5,7 @@ namespace Batch;
 use Batch\Output\OutputFactory;
 use Batch\Output\OutputInterface;
 use Batch\Process\ProcessInterface;
+use Batch\Process\ProcessException;
 
 /**
  * Class AbstractBatch : batch class abstraction
@@ -125,6 +126,10 @@ abstract class AbstractBatch implements BatchInterface
             $processObj->run($args);
             //stop
             $processObj->stop($processClass);
+        } catch (BatchException $be) {
+            $this->addErrorMessage('BatchException: ' . $be->getMessage());
+        } catch (ProcessException $pe) {
+            $this->addErrorMessage('ProcessException: ' . $pe->getMessage());
         } catch (\Exception $e) {
             $this->addErrorMessage($e->getMessage());
         }
@@ -135,19 +140,23 @@ abstract class AbstractBatch implements BatchInterface
     /**
      * @param $processClass
      * @return ProcessInterface
-     * @throws \Exception
+     * @throws BatchException
      */
     protected function getProcessFromClass($processClass)
     {
         //check if class exists
         if (!class_exists($processClass)) {
-            throw new \Exception('Process class ' . $processClass . ' does not exists');
+            throw BatchException::invalidProcessClass($processClass);
         }
+
+        //dynamic construct
         $processObj = new $processClass($this);
+
         //check if ProcessInterface
         if (!$processObj instanceof ProcessInterface) {
-            throw new \Exception('Process class ' . $processClass . ' must implements Batch\Process\ProcessInterface');
+            throw BatchException::invalidProcessObject($processClass);
         }
+        //return process object
         return $processObj;
     }
 

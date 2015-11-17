@@ -4,7 +4,7 @@ namespace Batch\Output;
 
 /**
  * Class Void : silent output
- * @package Language\Output
+ * @package Batch\Output
  */
 class Void implements OutputInterface
 {

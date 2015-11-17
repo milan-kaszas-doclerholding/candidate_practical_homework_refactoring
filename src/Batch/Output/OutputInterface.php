@@ -4,7 +4,7 @@ namespace Batch\Output;
 
 /**
  * Interface OutputInterface
- * @package Language\Output
+ * @package Batch\Output
  */
 interface OutputInterface
 {
