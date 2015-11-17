@@ -11,12 +11,40 @@ interface BatchInterface
     /**
      * @return string
      */
-    public static function getBatchVersion();
+    static function getVersion();
 
     /**
      * @return string
      */
-    public static function getBatchName();
+    static function getName();
 
+    /**
+     * @param $message
+     * @return BatchInterface
+     */
+    function addMessage($message);
+
+    /**
+     * @param $message
+     * @return BatchInterface
+     */
+    function addInfoMessage($message);
+
+    /**
+     * @param $message
+     * @return BatchInterface
+     */
+    function addSuccessMessage($message);
+
+    /**
+     * @param $message
+     * @return BatchInterface
+     */
+    function addErrorMessage($message);
+
+    /**
+     * @return BatchInterface
+     */
+    function flushMessages();
 
 }

@@ -13,6 +13,7 @@ class Console implements OutputInterface
      */
     const CLI_COLOR_RED = '0;31';
     const CLI_COLOR_GREEN = '1;32';
+    const CLI_COLOR_CYAN = '1;36';
 
     /**
      * Messages buffer
@@ -23,7 +24,7 @@ class Console implements OutputInterface
     /**
      * @inheritdoc
      */
-    public function addMessage($message, $severity = self::SEVERITY_INFO)
+    public function addMessage($message, $severity = self::SEVERITY_LOG)
     {
         array_push(
             $this->buffer,
@@ -68,6 +69,10 @@ class Console implements OutputInterface
             //red for error (obvious)
             case self::SEVERITY_ERROR:
                 $preparedMessage = $this->colorizeMessage($message, self::CLI_COLOR_RED);
+                break;
+            //cyan for info
+            case self::SEVERITY_INFO:
+                $preparedMessage = $this->colorizeMessage($message, self::CLI_COLOR_CYAN);
                 break;
             //no color for info and others
             default:

@@ -4,7 +4,7 @@ namespace Batch;
 
 use Batch\Output\OutputFactory;
 use Batch\Output\OutputInterface;
-use Batch\Config\Reader as ConfigReader;
+use Batch\Process\ProcessInterface;
 
 /**
  * Class AbstractBatch : batch class abstraction
@@ -14,22 +14,16 @@ abstract class AbstractBatch implements BatchInterface
 {
 
 	/**
-	 * @var ConfigReader
-	 */
-	protected $configReader;
-
-	/**
 	 * @var OutputInterface
 	 */
 	protected $output;
-
 
 	/**
 	 * Gets batch name
 	 * Uses late static binding
 	 * @return mixed
 	 */
-	public static function getBatchName()
+	public static function getName()
 	{
 		return static::$batchName;
 	}
@@ -39,7 +33,7 @@ abstract class AbstractBatch implements BatchInterface
 	 * Uses late static binding
 	 * @return mixed
 	 */
-	public static function getBatchVersion()
+	public static function getVersion()
 	{
 		return static::$batchVersion;
 	}
@@ -50,34 +44,46 @@ abstract class AbstractBatch implements BatchInterface
 	 */
 	public function __construct($outputType = OutputFactory::TYPE_CONSOLE)
 	{
-		//init deps
-		$this->configReader = new ConfigReader();
+		//build output from factory
 		$this->output = OutputFactory::create($outputType);
 	}
 
-	/**
-	 * @param $message
-	 * @return AbstractBatch
-	 */
-	protected function addInfoMessage($message)
+    /**
+     * @return OutputInterface
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function addMessage($message)
+    {
+        return $this->addOutputMessage($message);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function addInfoMessage($message)
 	{
-		return $this->addOutputMessage($message);
+		return $this->addOutputMessage($message, OutputInterface::SEVERITY_INFO);
 	}
 
-	/**
-	 * @param $message
-	 * @return AbstractBatch
-	 */
-	protected function addSuccessMessage($message)
+    /**
+     * @inheritdoc
+     */
+    public function addSuccessMessage($message)
 	{
 		return $this->addOutputMessage($message, OutputInterface::SEVERITY_SUCCESS);
 	}
 
-	/**
-	 * @param $message
-	 * @return AbstractBatch
-	 */
-	protected function addErrorMessage($message)
+    /**
+     * @inheritdoc
+     */
+    public function addErrorMessage($message)
 	{
 		return $this->addOutputMessage($message, OutputInterface::SEVERITY_ERROR);
 	}
@@ -85,26 +91,64 @@ abstract class AbstractBatch implements BatchInterface
 	/**
 	 * @param $message
 	 * @param string $severity
-	 * @return $this
+	 * @return BatchInterface
 	 */
-	private function addOutputMessage($message, $severity = OutputInterface::SEVERITY_INFO)
+    protected function addOutputMessage($message, $severity = OutputInterface::SEVERITY_LOG)
 	{
-		$this
-			->output
-			->addMessage($message, $severity);
+		$this->getOutput()->addMessage($message, $severity);
 		return $this;
 	}
 
 	/**
-	 * @return $this
+	 * @return BatchInterface
 	 */
-	protected function printOutputMessages()
+    public function flushMessages()
 	{
-		$this
-			->output
+		$this->getOutput()
 			->flushMessages()
 			->resetMessages();
 		return $this;
 	}
+
+    /**
+     * @param $processClass
+     * @param array $args
+     * @return BatchInterface
+     */
+    protected function runProcess($processClass, $args = [])
+    {
+        try{
+            $processObj = $this->getProcessFromClass($processClass);
+            //start
+            $processObj->start($processClass);
+            //run
+            $processObj->run($args);
+            //stop
+            $processObj->stop($processClass);
+        }catch (\Exception $e){
+            $this->addErrorMessage($e->getMessage());
+        }
+        //prints messages and return self
+        return $this->flushMessages();
+    }
+
+    /**
+     * @param $processClass
+     * @return ProcessInterface
+     * @throws \Exception
+     */
+    protected function getProcessFromClass($processClass)
+    {
+        //check if class exists
+        if(!class_exists($processClass)){
+            throw new \Exception('Process class ' . $processClass . ' does not exists');
+        }
+        $processObj = new $processClass($this);
+        //check if ProcessInterface
+        if(!$processObj instanceof ProcessInterface){
+            throw new \Exception('Process class ' . $processClass . ' must implements Batch\Process\ProcessInterface');
+        }
+        return $processObj;
+    }
 
 }

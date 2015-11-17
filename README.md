@@ -1,3 +1,12 @@
+#Jvuillemin homework remarks: system of batch classes launching process classes
+* changed composer.json (psr4 namespaces + allowed myself to require php>=5.4.0 for using traits)
+* DID NOT changed ApiCall.php and Config.php, but changed file location for coherent namespace
+* batch and process classes abstractions (abstracts, interfaces)
+* batch output factory
+* Api and Config singleton accessors (Singletonable trait)
+* absolutely no time to provide automated tests (huge workload in my current position, really sorry)
+* feel free to [contact me](mailto:ekkinox@gmail.com) if any questions
+
 #Task:
 Refactor the LanguageBatchBo!
 The goals are:

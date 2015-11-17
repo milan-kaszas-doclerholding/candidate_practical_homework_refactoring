@@ -1,15 +1,20 @@
 <?php
 
-namespace Batch\Config;
+namespace Language\Config;
 
 use Language\Config as BaseConfig;
+use Batch\Traits\Singletonable;
 
 /**
- * Class Reader
+ * Class Reader : Singleton access
  * @package Language\Config
  */
 class Reader
 {
+    /**
+     * Singleton trait
+     */
+    use Singletonable;
 
     /**
      * Knows keys from config
