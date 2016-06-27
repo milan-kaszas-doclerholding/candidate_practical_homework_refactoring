@@ -29,6 +29,11 @@ class LanguageBatchBoChild extends \Language\LanguageBatchBo
         return parent::getAppletLanguageFile($applet, $language);
     }
 
+    public static function getLanguageFile($applet, $language)
+    {
+        return parent::getLanguageFile($applet, $language);
+    }
+
     public static function apiCall($target, $mode, $getParameters, $postParameters)
     {
         return parent::apiCall($target, $mode, $getParameters, $postParameters);
@@ -48,6 +53,7 @@ class LanguageBatchBoChild extends \Language\LanguageBatchBo
  */
 class ApiCallMock
 {
+    /* @param PHPUnit_Framework_TestCase */
     public static $testInstance;
     public static $target;
     public static $mode;
@@ -297,5 +303,27 @@ class LanguageBatchBoTest extends PHPUnit_Framework_TestCase
         $output = ob_get_clean();
         $this->assertEquals($output, '', 'Do not log to the output');
         $this->assertEquals($logger->getLog(), $defaultLogOutput, 'Log into logger instance');
+    }
+
+    public function testGenerateLanguageFiles() {
+        $logger = new SimpleLogger();
+        $language = 'qu';
+        LanguageBatchBoChild::setApiClass('ApiCallMock');
+        ApiCallMock::setCallMock(
+            'system_api',
+            'language_api',
+            [ 'system' => 'LanguageFiles', 'action' => 'getLanguageFile' ],
+            ['language' => $language ],
+            /* Response: */
+            []
+        );
+        LanguageBatchBoChild::setLogger($logger);
+
+        try {
+            $data = LanguageBatchBoChild::getLanguageFile('unknown', 'qu');
+            $this->fail('Should throw exception');
+        } catch (Exception $ex) {
+            $this->assertContains('Error during getting language file', $ex->getMessage(), "Wrong response should throw exception");
+        }
     }
 }
