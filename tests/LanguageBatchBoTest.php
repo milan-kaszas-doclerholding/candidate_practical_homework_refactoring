@@ -42,6 +42,7 @@ class LanguageBatchBoChild extends \Language\LanguageBatchBo
 
 /**
  * I know about .getMockClass / .staticExpects but at my env they doesn't work
+ * ( or it better use Mockery but it's out of scope )
  * so I decide to avoid wasting time
  * Class ApiCallMock
  */
@@ -78,6 +79,47 @@ class ApiCallMock
     }
 }
 
+class ConfigMock {
+    protected static $hash = [];
+    public static function set($key, $value) {
+        self::$hash[$key] = $value;
+    }
+
+    public static function get($key) {
+        return self::$hash[$key];
+    }
+}
+
+class SimpleLogger implements \Language\SimpleLoggerInterface{
+    protected $log = '';
+    public function log($level, $msg, $context = null) {
+        $this->log .= "$msg".(!empty($context) ? "with context: $context" : "");
+    }
+
+    public function clear() {
+        $this->log = '';
+    }
+
+    public function getLog() {
+        return $this->log;
+    }
+}
+
+$defaultLogOutput = '
+Generating language files
+[APPLICATION: portal]
+	[LANGUAGE: en] OK
+	[LANGUAGE: hu] OK
+
+Getting applet language XMLs..
+ Getting > JSM2_MemberApplet (memberapplet) language xmls..
+ - Available languages: en
+ OK saving /Users/vvs/repo/candidate_practical_homework_refactoring/cache/flash/lang_en.xml was successful.
+ < JSM2_MemberApplet (memberapplet) language xml cached.
+
+Applet language XMLs generated.
+';
+
 class LanguageBatchBoTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
@@ -92,27 +134,13 @@ class LanguageBatchBoTest extends PHPUnit_Framework_TestCase
      */
     public function testInitialOutput()
     {
+        global $defaultLogOutput;
         ob_start();
         $languageBatchBo = new \Language\LanguageBatchBo();
         $languageBatchBo->generateLanguageFiles();
         $languageBatchBo->generateAppletLanguageXmlFiles();
         $output = ob_get_clean();
-        $this->assertEquals('
-Generating language files
-[APPLICATION: portal]
-	[LANGUAGE: en]string(76) "/Users/vvs/repo/candidate_practical_homework_refactoring/cache/portal/en.php"
- OK
-	[LANGUAGE: hu]string(76) "/Users/vvs/repo/candidate_practical_homework_refactoring/cache/portal/hu.php"
- OK
-
-Getting applet language XMLs..
- Getting > JSM2_MemberApplet (memberapplet) language xmls..
- - Available languages: en
- OK saving /Users/vvs/repo/candidate_practical_homework_refactoring/cache/flash/lang_en.xml was successful.
- < JSM2_MemberApplet (memberapplet) language xml cached.
-
-Applet language XMLs generated.
-', $output, 'The output is the same as at start');
+        $this->assertEquals($output, $defaultLogOutput, 'The output is the same as at start');
     }
 
     // protected static function checkForApiErrorResult
@@ -190,7 +218,6 @@ Applet language XMLs generated.
         $this->assertEquals($data, $testData, "Should return data from api");
     }
 
-
     // protected static function getAppletLanguages
     public function testGetAppletLanguages()
     {
@@ -225,5 +252,19 @@ Applet language XMLs generated.
 
         $data = LanguageBatchBoChild::getAppletLanguages($applet);
         $this->assertEquals($data, $testData, "Should return data from api");
+    }
+
+    public function testSetLogger() {
+        global $defaultLogOutput;
+        $logger = new SimpleLogger();
+        LanguageBatchBoChild::setLogger($logger);
+        LanguageBatchBoChild::setApiClass(null);
+        ob_start();
+        $languageBatchBo = new \Language\LanguageBatchBo();
+        $languageBatchBo->generateLanguageFiles();
+        $languageBatchBo->generateAppletLanguageXmlFiles();
+        $output = ob_get_clean();
+        $this->assertEquals($output, '', 'Do not log to the output');
+        $this->assertEquals($logger->getLog(), $defaultLogOutput, 'Log into logger instance');
     }
 }

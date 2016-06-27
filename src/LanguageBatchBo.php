@@ -3,6 +3,23 @@
 namespace Language;
 
 /**
+ * Interface SimpleLogger
+ * In future replace with
+ * @package Language Psr\Log\LoggerInterface
+ */
+interface SimpleLoggerInterface {
+	/**
+	 * Logs with an arbitrary level.
+	 *
+	 * @param mixed $level
+	 * @param string $message
+	 * @param array $context
+	 * @return null
+	 */
+	public function log($level, $message, $context);
+}
+
+/**
  * Business logic related to generating language files.
  */
 class LanguageBatchBo
@@ -12,6 +29,9 @@ class LanguageBatchBo
 
 	private static $apiClassName;
 	private static $configClassName;
+
+	/* @param SimpleLoggerInterface */
+	private static $logger;
 
 	/**
 	 * Contains the applications which ones require translations.
@@ -30,7 +50,7 @@ class LanguageBatchBo
 		// The applications where we need to translate.
 		self::$applications = self::getConfig('system.translated_applications');
 
-		echo "\nGenerating language files\n";
+		self::log("\nGenerating language files\n");
 		foreach (self::$applications as $application => $languages) {
 			self::getApplicationLangFiles($application, $languages);
 		}
@@ -65,6 +85,7 @@ class LanguageBatchBo
 		catch (\Exception $e) {
 			throw new \Exception('Error during getting language file: (' . $application . '/' . $language . ')');
 		}
+		// If we got correct data we store it.
 		return self::putLanguageFileIntoCache($application, $language, $languageResponse);
 	}
 
@@ -94,13 +115,13 @@ class LanguageBatchBo
 			'memberapplet' => 'JSM2_MemberApplet',
 		);
 
-		echo "\nGetting applet language XMLs..\n";
+		self::log("\nGetting applet language XMLs..\n");
 
 		foreach ($applets as $appletDirectory => $appletLanguageId) {
 			self::getAppletFiles($appletLanguageId, $appletDirectory);
 		}
 
-		echo "\nApplet language XMLs generated.\n";
+		self::log("\nApplet language XMLs generated.\n");
 	}
 
 	/**
@@ -224,7 +245,7 @@ class LanguageBatchBo
 		$xmlContent = self::getAppletLanguageFile($appletLanguageId, $language);
 		$xmlFile = $path . '/lang_' . $language . '.xml';
 		if (strlen($xmlContent) == file_put_contents($xmlFile, $xmlContent)) {
-			echo " OK saving $xmlFile was successful.\n";
+			self::log(" OK saving $xmlFile was successful.\n");
 		} else {
 			throw new \Exception('Unable to save applet: (' . $appletLanguageId . ') language: (' . $language
 				. ') xml (' . $xmlFile . ')!');
@@ -238,18 +259,18 @@ class LanguageBatchBo
 	 */
 	public static function getAppletFiles($appletLanguageId, $appletDirectory)
 	{
-		echo " Getting > $appletLanguageId ($appletDirectory) language xmls..\n";
+		self::log(" Getting > $appletLanguageId ($appletDirectory) language xmls..\n");
 		$languages = self::getAppletLanguages($appletLanguageId);
 		if (empty($languages)) {
 			throw new \Exception('There is no available languages for the ' . $appletLanguageId . ' applet.');
 		} else {
-			echo ' - Available languages: ' . implode(', ', $languages) . "\n";
+			self::log(' - Available languages: ' . implode(', ', $languages) . "\n");
 		}
 		$path = Config::get('system.paths.root') . '/cache/flash';
 		foreach ($languages as $language) {
 			self::loadAppletLanguageFile($appletLanguageId, $language, $path);
 		}
-		echo " < $appletLanguageId ($appletDirectory) language xml cached.\n";
+		self::log(" < $appletLanguageId ($appletDirectory) language xml cached.\n");
 	}
 
 	/**
@@ -259,11 +280,11 @@ class LanguageBatchBo
 	 */
 	public static function getApplicationLangFiles($application, $languages)
 	{
-		echo "[APPLICATION: " . $application . "]\n";
+		self::log("[APPLICATION: " . $application . "]\n");
 		foreach ($languages as $language) {
-			echo "\t[LANGUAGE: " . $language . "]";
+			self::log("\t[LANGUAGE: " . $language . "]");
 			if (self::getLanguageFile($application, $language)) {
-				echo " OK\n";
+				self::log(" OK\n");
 			} else {
 				throw new \Exception('Unable to generate language file!');
 			}
@@ -278,10 +299,8 @@ class LanguageBatchBo
 	 */
 	protected static function putLanguageFileIntoCache($application, $language, $languageResponse)
 	{
-// If we got correct data we store it.
 		$destination = self::getLanguageCachePath($application) . $language . '.php';
 		// If there is no folder yet, we'll create it.
-		var_dump($destination);
 		if (!is_dir(dirname($destination))) {
 			mkdir(dirname($destination), 0755, true);
 		}
@@ -289,5 +308,17 @@ class LanguageBatchBo
 		$result = file_put_contents($destination, $languageResponse['data']);
 
 		return (bool)$result;
+	}
+
+	private static function log($msg, $context = '') {
+		if (isset(self::$logger) and self::$logger instanceof SimpleLoggerInterface) {
+			self::$logger->log('debug', $msg, $context);
+		} else {
+			echo $msg;
+		}
+	}
+
+	public static function setLogger(SimpleLoggerInterface $logger) {
+		self::$logger = $logger;
 	}
 }
