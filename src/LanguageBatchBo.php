@@ -7,6 +7,12 @@ namespace Language;
  */
 class LanguageBatchBo
 {
+	public static $defaultApiClassName = 'Language\ApiCall';
+	public static $defaultConfigClassName = 'Language\Config';
+
+	private static $apiClassName;
+	private static $configClassName;
+
 	/**
 	 * Contains the applications which ones require translations.
 	 *
@@ -230,10 +236,20 @@ class LanguageBatchBo
 	}
 
 	protected static function apiCall($target, $mode, $getParameters, $postParameters) {
-		return ApiCall::call($target, $mode, $getParameters, $postParameters);
+		$className = isset(self::$apiClassName) ? self::$apiClassName : self::$defaultApiClassName;
+		return $className::call($target, $mode, $getParameters, $postParameters);
 	}
 
 	protected static function getConfig($key) {
+		$className = isset(self::$configClassName) ? self::$configClassName : self::$defaultConfigClassName;
 		return Config::get($key);
+	}
+
+	public static function setApiClass($className) {
+		self::$apiClassName = $className;
+	}
+
+	public static function setConfigClassName($className) {
+		self::$configClassName = $className;
 	}
 }
