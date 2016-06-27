@@ -22,7 +22,7 @@ class LanguageBatchBo
 	public static function generateLanguageFiles()
 	{
 		// The applications where we need to translate.
-		self::$applications = Config::get('system.translated_applications');
+		self::$applications = self::getConfig('system.translated_applications');
 
 		echo "\nGenerating language files\n";
 		foreach (self::$applications as $application => $languages) {
@@ -52,7 +52,7 @@ class LanguageBatchBo
 	protected static function getLanguageFile($application, $language)
 	{
 		$result = false;
-		$languageResponse = ApiCall::call(
+		$languageResponse = self::apiCall(
 			'system_api',
 			'language_api',
 			array(
@@ -146,7 +146,7 @@ class LanguageBatchBo
 	 */
 	protected static function getAppletLanguages($applet)
 	{
-		$result = ApiCall::call(
+		$result = self::apiCall(
 			'system_api',
 			'language_api',
 			array(
@@ -177,7 +177,7 @@ class LanguageBatchBo
 	 */
 	protected static function getAppletLanguageFile($applet, $language)
 	{
-		$result = ApiCall::call(
+		$result = self::apiCall(
 			'system_api',
 			'language_api',
 			array(
@@ -227,5 +227,13 @@ class LanguageBatchBo
 		if ($result['data'] === false) {
 			throw new \Exception('Wrong content!');
 		}
+	}
+
+	protected static function apiCall($target, $mode, $getParameters, $postParameters) {
+		return ApiCall::call($target, $mode, $getParameters, $postParameters);
+	}
+
+	protected static function getConfig($key) {
+		return Config::get($key);
 	}
 }
