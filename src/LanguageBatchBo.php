@@ -24,6 +24,7 @@ interface SimpleLoggerInterface {
  * @param $value
  * @param int $options
  * @param int $depth
+ * @codeCoverageIgnore
  */
 function safe_json_encode($value, $options = 0, $depth = 512) {
 	$ret = '';
@@ -251,11 +252,17 @@ class LanguageBatchBo
 		return $className::get($key);
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function setApiClass($className) {
 		self::log("setApiClass: ($className)");
 		self::$apiClassName = $className;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function setConfigClassName($className) {
 		self::log("setConfigClassName: ($className)");
 		self::$configClassName = $className;
@@ -326,6 +333,7 @@ class LanguageBatchBo
 	 * @param $language
 	 * @param $languageResponse
 	 * @return bool
+	 * @codeCoverageIgnore
 	 */
 	protected static function putLanguageFileIntoCache($application, $language, $languageResponse)
 	{
@@ -341,6 +349,11 @@ class LanguageBatchBo
 		return (bool)$result;
 	}
 
+	/**
+	 * @param $msg
+	 * @param string $context
+	 * @codeCoverageIgnore
+	 */
 	private static function log($msg, $context = '') {
 		if (isset(self::$logger) and self::$logger instanceof SimpleLoggerInterface) {
 			self::$logger->log('debug', $msg."\n", $context);
@@ -349,6 +362,10 @@ class LanguageBatchBo
 		}
 	}
 
+	/**
+	 * @param SimpleLoggerInterface $logger
+	 * @codeCoverageIgnore
+	 */
 	public static function setLogger(SimpleLoggerInterface $logger) {
 		self::$logger = $logger;
 	}
