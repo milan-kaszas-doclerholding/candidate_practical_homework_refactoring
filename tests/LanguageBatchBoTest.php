@@ -105,19 +105,50 @@ class SimpleLogger implements \Language\SimpleLoggerInterface{
     }
 }
 
-$defaultLogOutput = '
+$defaultLogOutput = 'generateLanguageFiles: ()
+getConfig: (system.translated_applications)
+
 Generating language files
-[APPLICATION: portal]
-	[LANGUAGE: en] OK
-	[LANGUAGE: hu] OK
+
+getApplicationLangFiles: (portal, )
+	[LANGUAGE: en]
+getLanguageFile: (portal, en)
+apiCall: (system_api, language_api, , )
+checkForApiErrorResult: ()
+putLanguageFileIntoCache: (portal, en, )
+getLanguageCachePath: (portal)
+ OK
+
+	[LANGUAGE: hu]
+getLanguageFile: (portal, hu)
+apiCall: (system_api, language_api, , )
+checkForApiErrorResult: ()
+putLanguageFileIntoCache: (portal, hu, )
+getLanguageCachePath: (portal)
+ OK
+
+generateAppletLanguageXmlFiles: ()
 
 Getting applet language XMLs..
- Getting > JSM2_MemberApplet (memberapplet) language xmls..
+
+getAppletFiles: (JSM2_MemberApplet, memberapplet)
+getAppletLanguages: (JSM2_MemberApplet)
+apiCall: (system_api, language_api, , )
+checkForApiErrorResult: ()
  - Available languages: en
- OK saving /Users/vvs/repo/candidate_practical_homework_refactoring/cache/flash/lang_en.xml was successful.
+
+loadAppletLanguageFile: (JSM2_MemberApplet, en, /Users/vvs/repo/candidate_practical_homework_refactoring/cache/flash)
+getAppletLanguageFile: (JSM2_MemberApplet, en)
+apiCall: (system_api, language_api, , )
+checkForApiErrorResult: ()
+xmlFile: lang_en.xml
+ OK saving lang_en.xml was successful.
+
  < JSM2_MemberApplet (memberapplet) language xml cached.
 
+
 Applet language XMLs generated.
+
 ';
 
 class LanguageBatchBoTest extends PHPUnit_Framework_TestCase
@@ -256,9 +287,9 @@ class LanguageBatchBoTest extends PHPUnit_Framework_TestCase
 
     public function testSetLogger() {
         global $defaultLogOutput;
+        LanguageBatchBoChild::setApiClass(null);
         $logger = new SimpleLogger();
         LanguageBatchBoChild::setLogger($logger);
-        LanguageBatchBoChild::setApiClass(null);
         ob_start();
         $languageBatchBo = new \Language\LanguageBatchBo();
         $languageBatchBo->generateLanguageFiles();

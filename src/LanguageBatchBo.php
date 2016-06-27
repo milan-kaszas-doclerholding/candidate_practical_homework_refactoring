@@ -20,6 +20,21 @@ interface SimpleLoggerInterface {
 }
 
 /**
+ * Wrapper around json_encode to prevent exceptions
+ * @param $value
+ * @param int $options
+ * @param int $depth
+ */
+function safe_json_encode($value, $options = 0, $depth = 512) {
+	$ret = '';
+	try {
+		$ret = json_encode($value,$options,$depth);
+	} catch (\Exception $ex) {
+		$ret = 'Error on encoding'.$ex->getMessage();
+	}
+}
+
+/**
  * Business logic related to generating language files.
  */
 class LanguageBatchBo
@@ -41,12 +56,13 @@ class LanguageBatchBo
 	protected static $applications = array();
 
 	/**
-	 * Starts the language file generation.
-	 *
+	 * Starts the language file generation.json_decode
 	 * @return void
 	 */
 	public static function generateLanguageFiles()
 	{
+		self::log("generateLanguageFiles: ()");
+
 		// The applications where we need to translate.
 		self::$applications = self::getConfig('system.translated_applications');
 
@@ -68,7 +84,7 @@ class LanguageBatchBo
 	 */
 	protected static function getLanguageFile($application, $language)
 	{
-		$result = false;
+		self::log("getLanguageFile: ($application, $language)");
 		$languageResponse = self::apiCall(
 			'system_api',
 			'language_api',
@@ -98,6 +114,7 @@ class LanguageBatchBo
 	 */
 	protected static function getLanguageCachePath($application)
 	{
+		self::log("getLanguageCachePath: ($application)");
 		return Config::get('system.paths.root') . '/cache/' . $application. '/';
 	}
 
@@ -110,6 +127,7 @@ class LanguageBatchBo
 	 */
 	public static function generateAppletLanguageXmlFiles()
 	{
+		self::log("generateAppletLanguageXmlFiles: ()");
 		// List of the applets [directory => applet_id].
 		$applets = array(
 			'memberapplet' => 'JSM2_MemberApplet',
@@ -133,6 +151,7 @@ class LanguageBatchBo
 	 */
 	protected static function getAppletLanguages($applet)
 	{
+		self::log("getAppletLanguages: ($applet)");
 		$result = self::apiCall(
 			'system_api',
 			'language_api',
@@ -164,6 +183,7 @@ class LanguageBatchBo
 	 */
 	protected static function getAppletLanguageFile($applet, $language)
 	{
+		self::log("getAppletLanguageFile: ($applet, $language)");
 		$result = self::apiCall(
 			'system_api',
 			'language_api',
@@ -199,6 +219,7 @@ class LanguageBatchBo
 	 */
 	protected static function checkForApiErrorResult($result)
 	{
+		self::log("checkForApiErrorResult: (".safe_json_encode($result).")");
 		// Error during the api call.
 		if ($result === false || !isset($result['status'])) {
 			throw new \Exception('Error during the api call');
@@ -217,20 +238,26 @@ class LanguageBatchBo
 	}
 
 	protected static function apiCall($target, $mode, $getParameters, $postParameters) {
+		$get = safe_json_encode($getParameters);
+		$post = safe_json_encode($postParameters);
+		self::log("apiCall: ($target, $mode, $get, $post)");
 		$className = isset(self::$apiClassName) ? self::$apiClassName : self::$defaultApiClassName;
 		return $className::call($target, $mode, $getParameters, $postParameters);
 	}
 
 	protected static function getConfig($key) {
+		self::log("getConfig: ($key)");
 		$className = isset(self::$configClassName) ? self::$configClassName : self::$defaultConfigClassName;
-		return Config::get($key);
+		return $className::get($key);
 	}
 
 	public static function setApiClass($className) {
+		self::log("setApiClass: ($className)");
 		self::$apiClassName = $className;
 	}
 
 	public static function setConfigClassName($className) {
+		self::log("setConfigClassName: ($className)");
 		self::$configClassName = $className;
 	}
 
@@ -242,10 +269,13 @@ class LanguageBatchBo
 	 */
 	public static function loadAppletLanguageFile($appletLanguageId, $language, $path)
 	{
+		self::log("loadAppletLanguageFile: ($appletLanguageId, $language, $path)");
 		$xmlContent = self::getAppletLanguageFile($appletLanguageId, $language);
-		$xmlFile = $path . '/lang_' . $language . '.xml';
+		$relativePath = 'lang_' . $language . '.xml';
+		$xmlFile = $path . '/'. $relativePath;
+		self::log("xmlFile: $relativePath");
 		if (strlen($xmlContent) == file_put_contents($xmlFile, $xmlContent)) {
-			self::log(" OK saving $xmlFile was successful.\n");
+			self::log(" OK saving $relativePath was successful.\n");
 		} else {
 			throw new \Exception('Unable to save applet: (' . $appletLanguageId . ') language: (' . $language
 				. ') xml (' . $xmlFile . ')!');
@@ -259,7 +289,7 @@ class LanguageBatchBo
 	 */
 	public static function getAppletFiles($appletLanguageId, $appletDirectory)
 	{
-		self::log(" Getting > $appletLanguageId ($appletDirectory) language xmls..\n");
+		self::log("getAppletFiles: ($appletLanguageId, $appletDirectory)");
 		$languages = self::getAppletLanguages($appletLanguageId);
 		if (empty($languages)) {
 			throw new \Exception('There is no available languages for the ' . $appletLanguageId . ' applet.');
@@ -280,7 +310,7 @@ class LanguageBatchBo
 	 */
 	public static function getApplicationLangFiles($application, $languages)
 	{
-		self::log("[APPLICATION: " . $application . "]\n");
+		self::log("getApplicationLangFiles: ($application, ". safe_json_encode($languages) .")");
 		foreach ($languages as $language) {
 			self::log("\t[LANGUAGE: " . $language . "]");
 			if (self::getLanguageFile($application, $language)) {
@@ -299,6 +329,7 @@ class LanguageBatchBo
 	 */
 	protected static function putLanguageFileIntoCache($application, $language, $languageResponse)
 	{
+		self::log("putLanguageFileIntoCache: ($application, $language, ".safe_json_encode($languageResponse).")");
 		$destination = self::getLanguageCachePath($application) . $language . '.php';
 		// If there is no folder yet, we'll create it.
 		if (!is_dir(dirname($destination))) {
@@ -312,9 +343,9 @@ class LanguageBatchBo
 
 	private static function log($msg, $context = '') {
 		if (isset(self::$logger) and self::$logger instanceof SimpleLoggerInterface) {
-			self::$logger->log('debug', $msg, $context);
+			self::$logger->log('debug', $msg."\n", $context);
 		} else {
-			echo $msg;
+			echo $msg."\n";
 		}
 	}
 
