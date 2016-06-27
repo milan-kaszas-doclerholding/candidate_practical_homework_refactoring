@@ -32,16 +32,7 @@ class LanguageBatchBo
 
 		echo "\nGenerating language files\n";
 		foreach (self::$applications as $application => $languages) {
-			echo "[APPLICATION: " . $application . "]\n";
-			foreach ($languages as $language) {
-				echo "\t[LANGUAGE: " . $language . "]";
-				if (self::getLanguageFile($application, $language)) {
-					echo " OK\n";
-				}
-				else {
-					throw new \Exception('Unable to generate language file!');
-				}
-			}
+			self::getApplicationLangFiles($application, $languages);
 		}
 	}
 
@@ -74,18 +65,7 @@ class LanguageBatchBo
 		catch (\Exception $e) {
 			throw new \Exception('Error during getting language file: (' . $application . '/' . $language . ')');
 		}
-
-		// If we got correct data we store it.
-		$destination = self::getLanguageCachePath($application) . $language . '.php';
-		// If there is no folder yet, we'll create it.
-		var_dump($destination);
-		if (!is_dir(dirname($destination))) {
-			mkdir(dirname($destination), 0755, true);
-		}
-
-		$result = file_put_contents($destination, $languageResponse['data']);
-
-		return (bool)$result;
+		return self::putLanguageFileIntoCache($application, $language, $languageResponse);
 	}
 
 	/**
@@ -117,27 +97,7 @@ class LanguageBatchBo
 		echo "\nGetting applet language XMLs..\n";
 
 		foreach ($applets as $appletDirectory => $appletLanguageId) {
-			echo " Getting > $appletLanguageId ($appletDirectory) language xmls..\n";
-			$languages = self::getAppletLanguages($appletLanguageId);
-			if (empty($languages)) {
-				throw new \Exception('There is no available languages for the ' . $appletLanguageId . ' applet.');
-			}
-			else {
-				echo ' - Available languages: ' . implode(', ', $languages) . "\n";
-			}
-			$path = Config::get('system.paths.root') . '/cache/flash';
-			foreach ($languages as $language) {
-				$xmlContent = self::getAppletLanguageFile($appletLanguageId, $language);
-				$xmlFile    = $path . '/lang_' . $language . '.xml';
-				if (strlen($xmlContent) == file_put_contents($xmlFile, $xmlContent)) {
-					echo " OK saving $xmlFile was successful.\n";
-				}
-				else {
-					throw new \Exception('Unable to save applet: (' . $appletLanguageId . ') language: (' . $language
-						. ') xml (' . $xmlFile . ')!');
-				}
-			}
-			echo " < $appletLanguageId ($appletDirectory) language xml cached.\n";
+			self::getAppletFiles($appletLanguageId, $appletDirectory);
 		}
 
 		echo "\nApplet language XMLs generated.\n";
@@ -251,5 +211,83 @@ class LanguageBatchBo
 
 	public static function setConfigClassName($className) {
 		self::$configClassName = $className;
+	}
+
+	/**
+	 * @param $appletLanguageId
+	 * @param $language
+	 * @param $path
+	 * @throws \Exception
+	 */
+	public static function loadAppletLanguageFile($appletLanguageId, $language, $path)
+	{
+		$xmlContent = self::getAppletLanguageFile($appletLanguageId, $language);
+		$xmlFile = $path . '/lang_' . $language . '.xml';
+		if (strlen($xmlContent) == file_put_contents($xmlFile, $xmlContent)) {
+			echo " OK saving $xmlFile was successful.\n";
+		} else {
+			throw new \Exception('Unable to save applet: (' . $appletLanguageId . ') language: (' . $language
+				. ') xml (' . $xmlFile . ')!');
+		}
+	}
+
+	/**
+	 * @param $appletLanguageId
+	 * @param $appletDirectory
+	 * @throws \Exception
+	 */
+	public static function getAppletFiles($appletLanguageId, $appletDirectory)
+	{
+		echo " Getting > $appletLanguageId ($appletDirectory) language xmls..\n";
+		$languages = self::getAppletLanguages($appletLanguageId);
+		if (empty($languages)) {
+			throw new \Exception('There is no available languages for the ' . $appletLanguageId . ' applet.');
+		} else {
+			echo ' - Available languages: ' . implode(', ', $languages) . "\n";
+		}
+		$path = Config::get('system.paths.root') . '/cache/flash';
+		foreach ($languages as $language) {
+			self::loadAppletLanguageFile($appletLanguageId, $language, $path);
+		}
+		echo " < $appletLanguageId ($appletDirectory) language xml cached.\n";
+	}
+
+	/**
+	 * @param $application
+	 * @param $languages
+	 * @throws \Exception
+	 */
+	public static function getApplicationLangFiles($application, $languages)
+	{
+		echo "[APPLICATION: " . $application . "]\n";
+		foreach ($languages as $language) {
+			echo "\t[LANGUAGE: " . $language . "]";
+			if (self::getLanguageFile($application, $language)) {
+				echo " OK\n";
+			} else {
+				throw new \Exception('Unable to generate language file!');
+			}
+		}
+	}
+
+	/**
+	 * @param $application
+	 * @param $language
+	 * @param $languageResponse
+	 * @return bool
+	 */
+	protected static function putLanguageFileIntoCache($application, $language, $languageResponse)
+	{
+// If we got correct data we store it.
+		$destination = self::getLanguageCachePath($application) . $language . '.php';
+		// If there is no folder yet, we'll create it.
+		var_dump($destination);
+		if (!is_dir(dirname($destination))) {
+			mkdir(dirname($destination), 0755, true);
+		}
+
+		$result = file_put_contents($destination, $languageResponse['data']);
+
+		return (bool)$result;
 	}
 }
