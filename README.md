@@ -13,6 +13,7 @@ The solution will be evaluated based on the following goals:
 * The ApiCall, and Config classes are mock/simplified versions of the original dependencies, they can not be changed.
 * The error message of the exceptions can be simplified.
 * The console output of the script doesn't have to be the same as in the original version.
+* You can upgrade code and dependencies to PHP 7.
 * Use PHPUnit as testing framework.
 * Inline comments are not necessary.
 * You can clone this repository, but the homework should be sent to us via email (including the git files) and it should not be shared on github, or otherwise on the internet. 
