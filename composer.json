@@ -1,6 +1,6 @@
 {
-    "name": "exam/2015_Q3_senior",
-    "description": "2015 Q3 Senior",
+    "name": "dh/php-refactoring",
+    "description": "PHP refactoring",
     "require": {
         "phpunit/phpunit": "4.7.*"
     },
